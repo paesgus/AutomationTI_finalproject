@@ -4,7 +4,7 @@ import requests
 import os
 
 url = 'http://localhost/upload/'
-path = '/home/student-00-ceab51a4388c/supplier-data/images/'
+path = os.getcwd() + '/supplier-data/images/'
 
 only_jpeg = []
 
