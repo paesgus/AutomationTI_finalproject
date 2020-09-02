@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
-import eg
 import shutil
 import psutil
 import socket
+import report_email
+import time
+import os
 
 def check_disk_usage(disk):
   disk_usage = shutil.disk_usage(disk)
@@ -19,15 +21,38 @@ def check_memory():
   return memory > 500
 
 def check_localhost():
-  print(socket.gethostbyname(socket.gethostname()))
-  if socket.gethostbyname(socket.gethostname()) == '127.0.0.1':
+  #print(socket.gethostbyname('localhost'))
+  if socket.gethostbyname('localhost') == '127.0.0.1':
     return True
   else:
     return False
 
-if not check_disk_usage('/') or not check_cpu_usage() or not check_memory() or not check_localhost():
-  print("shit")
-else:
-  print('ok')
+
+def alert(error):
+  sender = "automation@example.com"
+  receiver = "{}@example.com".format(os.environ.get('USER'))
+  subject = error
+  body = "Please check your system and resolve the issue as soon as possible."
+  message = report_email.generate(sender, receiver, subject, body, '')
+  report_email.send(message)
+
+
+def main():
+
+  while True:
+    if not check_disk_usage('/'):
+      alert('Error - Available disk space is less than 20%')
+    if not check_cpu_usage():
+      alert('Error - CPU usage is over 80%')
+    if not check_memory():
+      alert('Error - Available memory is less than 500MB')
+    if not check_localhost():
+      alert('Error - localhost cannot be resolved to 127.0.0.1')
+
+    time.sleep(60)
+
+
+if __name__ == "__main__":
+  main()
 
 
